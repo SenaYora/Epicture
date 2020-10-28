@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to B-DEV-501-PAR-5-1-epicture-mathis.rodrigues-de-oliveira 👋</h1>
+<h1 align="center">Welcome to Epicture 👋</h1>
 <p>
 </p>
 
