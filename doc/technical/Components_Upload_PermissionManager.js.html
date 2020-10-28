@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Upload/PermissionManager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Upload/PermissionManager.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react'
+import { usePermissions, CAMERA, CAMERA_ROLL } from 'expo-permissions'
+import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native'
+
+import { postsBackgroundColor } from '../../config/theme'
+import CannotRead from '../../assets/icr-logo.png'
+
+/**
+ * @description Displays a placeholder if permissions are not given properly
+ * @param {Object} children children native props
+ * @param {Object} navigation Control object of the TabNavigation
+ */
+function PermissionManager({ children, navigation }) {
+  const [permission, askForPermission] = usePermissions([CAMERA, CAMERA_ROLL], { ask: false });
+
+  return (
+    &lt;View style={styles.main}>
+      { (!permission || permission.status !== 'granted') &amp;&amp;
+        &lt;View style={styles.noPermissionBox}>
+          &lt;Image style={styles.image} source={CannotRead} />
+          &lt;Text style={styles.permissionText}>Please give us the permission to read your beautiful gallery !&lt;/Text>
+          &lt;TouchableOpacity style={styles.leftButton} onPress={() => navigation.navigate('Home')}>
+            &lt;Text style={styles.buttonText}>No Thanks&lt;/Text>
+          &lt;/TouchableOpacity>
+          &lt;TouchableOpacity style={styles.rightButton} onPress={askForPermission}>
+            &lt;Text style={styles.buttonText}>Allow&lt;/Text>
+          &lt;/TouchableOpacity>
+        &lt;/View>
+      }
+      { (permission &amp;&amp; permission.status === 'granted') &amp;&amp;
+        children
+      }
+    &lt;/View>
+  )
+}
+
+const styles = StyleSheet.create({
+  main: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: postsBackgroundColor,
+    justifyContent: 'center'
+  },
+  noPermissionBox: {
+    backgroundColor: 'white',
+    width: '80%',
+    height: 'auto',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderRadius: 25,
+    position: 'relative',
+  },
+  image: {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    resizeMode: "contain",
+  },
+  permissionText: {
+    textAlign: 'center',
+    fontWeight: '600',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    fontSize: 14,
+    marginBottom: 60,
+  },
+  leftButton: {
+    height: 50,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '50%',
+    backgroundColor: '#1E1E1E',
+    borderBottomLeftRadius: 25,
+    justifyContent: 'center'
+  },
+  rightButton: {
+    height: 50,
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: '50%',
+    backgroundColor: '#6e6',
+    borderBottomRightRadius: 25,
+    justifyContent: 'center'
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: 'white'
+  }
+})
+
+export default PermissionManager</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

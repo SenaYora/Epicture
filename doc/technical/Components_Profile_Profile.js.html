@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Profile/Profile.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Profile/Profile.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useEffect, useState } from 'react'
+import { View, StyleSheet, Text, Image } from 'react-native'
+import AsyncStorage from '@react-native-community/async-storage'
+import { createDrawerNavigator, DrawerItem } from '@react-navigation/drawer'
+import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import Ionicons from 'react-native-vector-icons/Ionicons'
+
+import InfoProfile from './InfoProfile'
+import Settings from './Settings'
+import MyImagesTab from './Tab/MyImagesTab'
+import MyAlbumTab from './Tab/MyAlbumTab'
+import MyFavoritesTab from './Tab/MyFavoritesTab'
+import AboutTab from './Tab/AboutTab'
+
+import {
+  drawerBackgroundColor,
+  globalBlueColor,
+  drawerReverseTextColor,
+  drawerTextColor
+} from '../../config/theme'
+import { getMyAccountParams } from '../../API/API'
+
+const Categories = [
+  {
+    name: 'Images',
+    label: 'IMAGES',
+    component: MyImagesTab
+  },
+  {
+    name: 'Albums',
+    label: 'ALBUMS',
+    component: MyAlbumTab
+  },
+  {
+    name: 'Favorites',
+    label: 'FAVORITES',
+    component: MyFavoritesTab
+  },
+  {
+    name: 'About',
+    label: 'ABOUT',
+    component: AboutTab
+  }
+]
+
+function CustomDrawerContent(props) {
+  const { data, disconnectAccount } = props
+  return (
+    &lt;DrawerContentScrollView {...props}>
+      &lt;View style={{ width: '100%', alignItems: 'center', marginTop: 25 }}>
+        &lt;Image source={{ uri: data.avatar + `&amp;nocache=${data.avatar_name}` }} style={{ width: 80, height: 80, borderRadius: 100 }} />
+        &lt;Text style={styles.drawerTitle}>{data.url}&lt;/Text>
+        &lt;Text style={styles.drawerSubtitle}>{data.reputation}{" • "}{data.reputation_name}&lt;/Text>
+      &lt;/View>
+      &lt;DrawerItemList {...props} />
+      &lt;DrawerItem
+        label="Disconnect"
+        icon={({ color, size }) => &lt;Ionicons name={"ios-log-out"} size={size} color={color} />}
+        inactiveBackgroundColor={globalBlueColor}
+        inactiveTintColor={drawerReverseTextColor}
+        onPress={disconnectAccount}
+      />
+    &lt;/DrawerContentScrollView>
+  );
+}
+
+const ProfileWrapper = ({ data, selectedCategory, setCategory, token }) => {
+  const Component = Categories.find(e => e.name === selectedCategory).component
+
+  return (
+    &lt;View style={{ height: '100%', width: '100%' }}>
+      &lt;InfoProfile
+        data={data}
+        categories={Categories}
+        selectedCategory={selectedCategory}
+        setCategory={setCategory}
+      />
+      &lt;Component token={token} bio={data.bio} />
+    &lt;/View>
+  )
+}
+
+/**
+ * @description Displays all informations about the user currently logs in, his images, albums, favorites and settings
+ * @param {Function} disconnectAccount Function to trigger the disonnection of the user
+ */
+function Profile({ disconnectAccount }) {
+  const [accountParams, setAccountParams] = useState(null)
+  const [myData, setMyData] = useState(null)
+  const [category, setCategory] = useState(Categories[0].name)
+  const Drawer = createDrawerNavigator();
+
+  useEffect(() => {
+    (async () => {
+      const acc = JSON.parse(await AsyncStorage.getItem("account_params"))
+      setAccountParams(acc)
+      const res = await getMyAccountParams(acc.access_token)
+      setMyData(res.data)
+    })()
+  }, [])
+
+  return (accountParams &amp;&amp; myData &amp;&amp;
+    &lt;Drawer.Navigator
+      screenOptions={({ route }) => ({
+        drawerIcon: ({ color, size }) => &lt;Ionicons name={route.name === "Profile" ? "ios-person" : "md-settings"} size={size} color={color} />
+      })}
+      initialRouteName="Profile"
+      drawerPosition="right"
+      drawerStyle={styles.drawerStyle}
+      drawerContent={(props) => &lt;CustomDrawerContent {...props} data={myData} disconnectAccount={disconnectAccount} />}
+      drawerContentOptions={{
+        inactiveTintColor: drawerTextColor,
+        activeTintColor: globalBlueColor,
+      }}
+    >
+      &lt;Drawer.Screen name="Profile">
+        {() => &lt;ProfileWrapper
+          data={myData}
+          selectedCategory={category}
+          setCategory={setCategory}
+          token={accountParams.access_token}
+        />}
+      &lt;/Drawer.Screen>
+      &lt;Drawer.Screen name="Settings">
+        {() => &lt;Settings
+          data={myData}
+          token={accountParams.access_token}
+          setData={setMyData}
+        />}
+      &lt;/Drawer.Screen>
+    &lt;/Drawer.Navigator>
+  )
+}
+
+const styles = StyleSheet.create({
+  drawerStyle: {
+    backgroundColor: drawerBackgroundColor,
+  },
+  drawerTitle: {
+    color: drawerTextColor,
+    fontWeight: '700',
+    fontSize: 20,
+    marginTop: 10
+  },
+  drawerSubtitle: {
+    color: drawerTextColor,
+    fontWeight: '600',
+    fontSize: 13,
+    marginBottom: 20
+  },
+  disconnectButton: {
+    backgroundColor: globalBlueColor,
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    paddingLeft: 17,
+  }
+})
+
+export default Profile</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Profile/Settings.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Profile/Settings.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Fragment, useEffect, useState } from 'react'
+import { View, StyleSheet, Text, Image, TouchableOpacity, Modal, ScrollView } from 'react-native'
+import { Icon, Button, Input } from 'native-base'
+import { useNavigation } from '@react-navigation/native'
+
+import { changeAccountSetting, getAvatarList } from '../../API/API'
+
+/**
+ * @description A Page to edit personnal informations and settings of the user
+ * @param {Object} data An object containing informations about the user currently logs in
+ * @param {Function} setData Function which set data in a higher level component
+ */
+function Settings({ data, setData, token }) {
+  const [avatarList, setAvatarList] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const [focusedAvatar, setFocusedAvatar] = useState(0)
+  const [changedData, setChangedData] = useState(data)
+  const navigation = useNavigation()
+
+  useEffect(() => {
+    (async () => {
+      const rep = await getAvatarList(token, data.url)
+      setAvatarList(rep.data.available_avatars)
+      setFocusedAvatar(rep.data.available_avatars.findIndex(e => e.name === data.avatar_name))
+    })()
+  }, [])
+
+  const updateAvatar = (i, e) => {
+    setFocusedAvatar(i)
+    setChangedData(prev => ({ ...prev, avatar: e.location, avatar_name: e.name }))
+  }
+
+  const updateSettings = () => {
+    changeAccountSetting(token, changedData.url, changedData.bio, changedData.avatar_name)
+    setData(changedData)
+    navigation.navigate('Profile')
+  }
+
+  return (
+    &lt;Fragment>
+      &lt;Modal transparent visible={isOpen} animationType={"slide"}>
+        &lt;View style={{ flex: 1, backgroundColor: '#eee' }}>
+          &lt;View style={{ flexDirection: 'row', justifyContent: "space-between" }}>
+            &lt;TouchableOpacity onPress={() => setIsOpen(false)} >
+              &lt;Icon active name="ios-close" style={{ fontSize: 80, marginLeft: 20 }} />
+            &lt;/TouchableOpacity>
+            &lt;Text style={{ alignSelf: "center", marginRight: 40, fontSize: 18, fontWeight: "700", color: "black" }}>CHOOSE A PICTURE&lt;/Text>
+            &lt;Text style={{ alignSelf: "center" }} />
+          &lt;/View>
+          &lt;ScrollView style={{ flex: 1, backgroundColor: '#eee', }}>
+            &lt;View style={{ flexDirection: 'row', flex: 1, flexWrap: 'wrap', justifyContent: 'center' }} >
+              {avatarList &amp;&amp; avatarList.map((e, i) => (
+                &lt;TouchableOpacity onPress={() => updateAvatar(i, e)} key={i}>
+                  &lt;Image style={i === focusedAvatar ? styles.avatarFocus : styles.avatar} source={{ uri: e.location }} />
+                &lt;/TouchableOpacity>
+              ))}
+            &lt;/View>
+          &lt;/ScrollView>
+        &lt;/View>
+      &lt;/Modal>
+      &lt;ScrollView style={{ flex: 1 }}>
+        &lt;Button transparent onPress={navigation.openDrawer} style={styles.drawerButton}>
+          &lt;Icon name='menu' style={{ fontSize: 33, color: 'black' }} />
+        &lt;/Button>
+        &lt;Text style={{ alignSelf: "center", fontSize: 20, marginTop: 20, fontWeight: "700" }}>EDIT PROFILE&lt;/Text>
+        &lt;TouchableOpacity onPress={() => setIsOpen(true)} style={{ flexDirection: "row", justifyContent: "center" }}>
+          &lt;Image source={{ uri: changedData.avatar + `&amp;nocache=${changedData.avatar_name}` }} style={{ height: 100, width: 100, borderRadius: 1000, marginTop: 50 }} />
+        &lt;/TouchableOpacity>
+        &lt;Text style={{ marginTop: 70, marginLeft: 25, color: 'grey' }}>Username&lt;/Text>
+        &lt;View style={{ flexDirection: "row", marginTop: 5, borderBottomWidth: 1, borderBottomColor: 'grey', marginLeft: 30, marginRight: 30 }}>
+          &lt;Input
+            placeholder="Username"
+            placeholderTextColor="grey"
+            style={{ color: 'black', fontSize: 20 }}
+            onChangeText={(value) => setChangedData(prev => ({ ...prev, url: value }))}
+            value={changedData.url}
+          />
+        &lt;/View>
+        &lt;Text style={{ marginTop: 40, marginLeft: 25, color: 'grey' }}>Bio&lt;/Text>
+        &lt;View style={{ flexDirection: "row", marginTop: 5, borderBottomWidth: 1, borderBottomColor: 'grey', marginLeft: 30, marginRight: 30 }}>
+          &lt;Input
+            placeholder="Write your bio here"
+            placeholderTextColor="grey"
+            style={{ color: 'black', fontSize: 20 }}
+            multiline={true}
+            onChangeText={(value) => setChangedData(prev => ({ ...prev, bio: value }))}
+            value={changedData.bio}
+          />
+        &lt;/View>
+        &lt;TouchableOpacity onPress={updateSettings} style={{ alignSelf: 'center', marginTop: 40, backgroundColor: '#1b7ce2', borderRadius: 10, padding: 8, paddingLeft: 15, paddingRight: 15 }}>
+          &lt;Text style={{ fontSize: 20, alignSelf: "center", fontWeight: "700", color: 'white' }}>Save&lt;/Text>
+        &lt;/TouchableOpacity>
+      &lt;/ScrollView>
+    &lt;/Fragment>
+  )
+}
+
+const styles = StyleSheet.create({
+  drawerButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10
+  },
+  avatarFocus: {
+    borderColor: 'black',
+    borderWidth: 4,
+    height: 80,
+    width: 80,
+    borderRadius: 100,
+    margin: 10,
+  },
+  avatar: {
+    height: 80,
+    width: 80,
+    borderRadius: 100,
+    margin: 10,
+  }
+})
+
+export default Settings</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

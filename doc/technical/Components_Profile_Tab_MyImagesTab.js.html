@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Profile/Tab/MyImagesTab.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Profile/Tab/MyImagesTab.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useEffect, useState } from 'react'
+import { TouchableOpacity, StyleSheet, FlatList, View, Modal } from 'react-native'
+
+import SortArray from '../SortArray'
+import { BackgroundImage, BackgroundVideo } from '../BackgroundItem'
+import InfoModal from '../../Home/InfoModal'
+
+import { getMyImages } from '../../../API/API'
+import { drawerBackgroundColor } from '../../../config/theme'
+
+const Sort = [
+  {
+    name: 'NEWEST',
+    value: true
+  },
+  {
+    name: 'OLDEST',
+    value: false
+  }
+]
+
+/**
+ * @description An Item rendered by upper FlatList
+ * @param {Object} item Current item of the upper array
+ * @param {Bool} last True if current item is the last item of the upper array
+ */
+const ImageItem = ({ item, last }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  return (
+    &lt;View style={{ ...styles.itemContainer, height: last ? 200 : 120 }}>
+      { item.type !== 'video/mp4' &amp;&amp;
+        &lt; BackgroundImage uri={item.link}>
+          &lt;TouchableOpacity transparent style={{ width: '100%', height: '100%' }} onPress={() => setIsModalOpen(prev => !prev)} />
+        &lt;/BackgroundImage>
+      }
+      { item.type === 'video/mp4' &amp;&amp;
+        &lt; BackgroundVideo uri={item.link}>
+          &lt;TouchableOpacity transparent style={{ width: '100%', height: '100%' }} onPress={() => setIsModalOpen(prev => !prev)} />
+        &lt;/ BackgroundVideo>
+      }
+      &lt;Modal transparent visible={isModalOpen} animationType={"slide"}>
+        &lt;InfoModal setModalState={setIsModalOpen} item={item} setFavoriteById={() => null} />
+      &lt;/Modal>
+    &lt;/View>
+  )
+}
+
+/**
+ * @description Tab which displays all images (private or public) posted by the user
+ * @param {String} token Access token to permit the user to call Imgur API
+ */
+function MyImagesTab({ token }) {
+  const [images, setImages] = useState(null)
+  const [sortAscending, setSortAscending] = useState(true)
+
+  useEffect(() => {
+    (async () => {
+      const rep = await getMyImages(token)
+      setImages(rep.data.sort((a, b) => sortAscending ? b.datetime - a.datetime : a.datetime - b.datetime))
+    })()
+  }, [])
+
+  const sortImageByDate = (sortAscending) => {
+    const _images = [...images]
+    setImages(_images.sort((a, b) => sortAscending ? b.datetime - a.datetime : a.datetime - b.datetime))
+  }
+
+  return (
+    &lt;View style={styles.container}>
+      &lt;SortArray array={Sort} setArray={(value) => { setSortAscending(value); sortImageByDate(value) }} isSorted={sortAscending} />
+      { images &amp;&amp;
+        &lt;FlatList
+          data={images.slice(1)}
+          renderItem={({ item, index }) => &lt;ImageItem item={item} last={index === images.length - 2 &amp;&amp; !(images.length % 2)} />}
+          ListHeaderComponent={() => &lt;ImageItem item={images[0]} last />}
+          keyExtractor={image => image.id}
+          numColumns={2}
+          style={{ marginTop: 10 }}
+        />
+      }
+    &lt;/View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    height: '70%',
+    padding: 20,
+  },
+  itemContainer: {
+    position: 'relative',
+    flex: 1,
+    backgroundColor: drawerBackgroundColor,
+    margin: 10,
+    borderRadius: 15,
+    borderColor: 'black',
+  },
+  itemInfo: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#333a',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  infoCat: {
+    marginLeft: 10,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  icon: {
+    color: 'white',
+    fontSize: 17,
+  },
+  text: {
+    color: 'white',
+    fontSize: 13,
+    marginLeft: 5
+  }
+})
+
+export default MyImagesTab</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

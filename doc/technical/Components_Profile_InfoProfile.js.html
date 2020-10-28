@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Profile/InfoProfile.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Profile/InfoProfile.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react'
+import { ImageBackground, View, Image, StyleSheet, Text } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+
+import { Icon, Subtitle, Title, Button } from 'native-base'
+
+/**
+ * @description Displays header of profile information page
+ * @param {Object} data An object containing informations about the user currently logs in
+ * @param {Array} categories An array of available categories to displays as profile informations
+ * @param {String} selectedCategory Name of the current selected category
+ * @param {Function} setCategory Function to set selectedCategory in a higher level component
+ */
+function InfoProfile({ data, categories, selectedCategory, setCategory }) {
+  const navigation = useNavigation()
+
+  return (
+    &lt;View style={styles.container}>
+      &lt;ImageBackground source={{ uri: data.cover }} style={styles.imageBackground}>
+        &lt;View style={{ flexDirection: 'row', marginLeft: 30, marginTop: 50, alignItems: 'center' }}>
+          &lt;Image source={{ uri: data.avatar + `&amp;nocache=${data.avatar_name}` }} style={styles.pp} />
+          &lt;View style={{ marginLeft: 25 }}>
+            &lt;Title style={{ fontWeight: 'bold', fontSize: 24, width: '200%' }}>
+              {data.url}
+            &lt;/Title>
+            &lt;Subtitle style={{ fontWeight: 'bold', fontSize: 14 }}>
+              {data.reputation} pts
+              {"   •   "}
+              {data.reputation_name}
+            &lt;/Subtitle>
+          &lt;/View>
+        &lt;/View>
+        &lt;Button transparent onPress={navigation.openDrawer} style={styles.drawerButton}>
+          &lt;Icon name='menu' style={{ fontSize: 33, color: 'white' }} />
+        &lt;/Button>
+        &lt;View style={styles.categoryContainer}>
+          {categories.map((e, i) =>
+            &lt;Button transparent key={i} style={{ flexDirection: 'column' }} onPress={() => setCategory(e.name)}>
+              &lt;Text style={{ fontSize: 14, color: 'white', fontWeight: e.name === selectedCategory ? '700' : '500' }}>{e.label}&lt;/Text>
+              {e.name === selectedCategory &amp;&amp;
+                &lt;View style={styles.selectedCategory} />
+              }
+            &lt;/Button>
+          )}
+        &lt;/View>
+      &lt;/ImageBackground>
+    &lt;/View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    height: '30%',
+    position: 'relative',
+  },
+  drawerButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10
+  },
+  imageBackground: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  pp: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+    borderRadius: 1000,
+  },
+  categoryContainer: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
+  },
+  selectedCategory: {
+    width: '100%',
+    height: 5,
+    borderRadius: 4,
+    backgroundColor: 'white'
+  }
+})
+
+export default InfoProfile</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

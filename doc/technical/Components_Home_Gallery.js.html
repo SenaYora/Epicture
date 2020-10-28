@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Home/Gallery.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Home/Gallery.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Fragment, useState } from 'react';
+import { Image, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { Card, CardItem, Text, Button, Icon, Left, Right } from 'native-base'
+import { Video } from 'expo-av'
+
+import InfoModal from './InfoModal'
+
+import { globalBlueColor, titleTextColor, homeBackgroundColor } from '../../config/theme'
+
+/**
+ * @function
+ * @description Displays an Image or a Video depending on its type
+ * @param {Object} info An object containing current item's informations
+ */
+function CustomImage({ info }) {
+  const uri = !info.images ? info.link : info.images[0].link
+  const type = !info.images ? info.type : info.images[0].type
+
+  if (type === "video/mp4")
+    return &lt;Video source={{ uri }} style={styles.video} shouldPlay isLooping isMuted resizeMode={Video.RESIZE_MODE_CONTAIN} />
+  return &lt;Image source={{ uri }} style={styles.image} />
+}
+
+/**
+ * @function
+ * @description Displays a card with basic current item's informations. Open a modal on click
+ * @param {Object} info An object containing current item's informations
+ * @param {Function} setFavoriteById A function to set favorite values depending on the id in a higher level component
+ * @param {Function} setVoteById A function to set vote values depending on the id in a higher level component
+ */
+function Gallery({ info, setFavoriteById, setVoteById }) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  return (
+    &lt;Fragment>
+      &lt;Modal transparent visible={isModalOpen} animationType={"slide"}>
+        &lt;InfoModal setModalState={setIsModalOpen} item={info} setFavoriteById={setFavoriteById} setVoteById={setVoteById} />
+      &lt;/Modal>
+      &lt;TouchableOpacity style={styles.item} onPress={() => setIsModalOpen(true)}>
+        &lt;Card>
+          &lt;CardItem>
+            &lt;Left>
+              &lt;Text numberOfLines={1} style={styles.titleText}>{info.title}&lt;/Text>
+            &lt;/Left>
+          &lt;/CardItem>
+          &lt;CardItem cardBody>
+            &lt;CustomImage info={info} />
+          &lt;/CardItem>
+          &lt;CardItem>
+            &lt;Left>
+              &lt;Button transparent>
+                &lt;Icon name="heart" style={{ color: globalBlueColor }} />
+                &lt;Text style={{ color: globalBlueColor }}>{info.favorite_count} Favorite{info.favorite_count ? 's' : ''}&lt;/Text>
+              &lt;/Button>
+            &lt;/Left>
+            &lt;Right>
+              &lt;Button transparent>
+                &lt;Icon name="chatbubbles" style={{ color: globalBlueColor }} />
+                &lt;Text style={{ color: globalBlueColor }}>{info.comment_count} comment{info.comment_count ? 's' : ''}&lt;/Text>
+              &lt;/Button>
+            &lt;/Right>
+          &lt;/CardItem>
+        &lt;/Card>
+      &lt;/TouchableOpacity>
+    &lt;/Fragment>
+  );
+}
+
+const styles = StyleSheet.create({
+  item: {
+    padding: 10,
+    backgroundColor: homeBackgroundColor,
+  },
+  titleText: {
+    color: titleTextColor,
+    fontWeight: '700',
+  },
+  image: {
+    height: 300,
+    width: null,
+    flex: 1,
+    resizeMode: 'contain'
+  },
+  video: {
+    height: 300,
+    width: '100%',
+    resizeMode: 'center',
+    flex: 1
+  }
+})
+
+export default Gallery</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

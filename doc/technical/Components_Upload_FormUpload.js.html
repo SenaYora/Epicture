@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Upload/FormUpload.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Upload/FormUpload.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Fragment, useState } from 'react'
+import { StyleSheet, View, Text, TextInput } from 'react-native'
+import CheckBox from '@react-native-community/checkbox'
+
+import { inputBorderColor, uploadFormTextColor, uploadFormPlaceholderColor } from '../../config/theme'
+
+/**
+ * @description Form of informations for the upload. User can modify Title, Description, isAlbum and isPublic
+ * @param {Bool} isUploading True if an image is being uploaded, setted in a higher level component
+ * @param {Function} setFormData Function to set formData in a higher level component
+ */
+function FormUpload({ isUploading, setFormData }) {
+  const [titleInputValue, setTitleInputValue] = useState("")
+  const [descInputValue, setDescInputValue] = useState("")
+  const [toggleIsAlbum, setToggleIsAlbum] = useState(false)
+  const [toggleIsPublic, setToggleIsPublic] = useState(false)
+
+  const setTitle = (value) => {
+    setTitleInputValue(value)
+    setFormData(prev => ({ ...prev, title: value }))
+  }
+
+  const setDescription = (value) => {
+    setDescInputValue(value)
+    setFormData(prev => ({ ...prev, description: value }))
+  }
+
+  const setIsAlbum = (value) => {
+    setToggleIsAlbum(value)
+    setFormData(prev => ({ ...prev, isAlbum: value }))
+  }
+
+  const setIsPublic = (value) => {
+    setToggleIsPublic(value)
+    setFormData(prev => ({ ...prev, isPublic: value }))
+  }
+
+  return (
+    &lt;Fragment>
+      &lt;View style={{ ...styles.container, justifyContent: "flex-start", marginTop: 40 }}>
+        &lt;Text style={styles.formText}>
+          {toggleIsAlbum ? "Album title:" : "Title:"}
+        &lt;/Text>
+        &lt;TextInput
+          style={{ ...styles.titleInput, width: toggleIsAlbum ? '70%' : '80%' }}
+          value={titleInputValue}
+          onChangeText={setTitle}
+          placeholder="A beautiful title for your pic"
+          placeholderTextColor={uploadFormPlaceholderColor}
+          editable={!isUploading}
+        />
+      &lt;/View>
+      &lt;View style={{ justifyContent: "flex-start", marginTop: 40, width: '80%' }}>
+        &lt;Text style={styles.formText}>
+          {toggleIsAlbum ? "Album description:" : "Description:"}
+        &lt;/Text>
+        &lt;TextInput
+          style={styles.descInput}
+          value={descInputValue}
+          onChangeText={setDescription}
+          multiline
+          editable={!isUploading}
+        />
+      &lt;/View>
+      &lt;View style={{ marginTop: 20, width: '80%', justifyContent: 'flex-start', flexDirection: 'row', alignItems: 'center' }}>
+        &lt;CheckBox
+          disabled={isUploading}
+          value={toggleIsAlbum}
+          onValueChange={(newValue) => setIsAlbum(newValue)}
+        />
+        &lt;Text style={styles.formText}>
+          Upload as an album
+        &lt;/Text>
+      &lt;/View>
+      &lt;View style={{ width: '80%', justifyContent: 'flex-start', flexDirection: 'row', alignItems: 'center' }}>
+        &lt;CheckBox
+          disabled={isUploading || !toggleIsAlbum}
+          value={toggleIsPublic}
+          onValueChange={(newValue) => setIsPublic(newValue)}
+        />
+        &lt;Text style={styles.formText}>
+          Share with community !
+        &lt;/Text>
+      &lt;/View>
+    &lt;/Fragment>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: '80%',
+    flexDirection: 'row',
+    justifyContent: "space-evenly",
+    alignItems: "center"
+  },
+  formText: {
+    color: uploadFormTextColor,
+    fontSize: 14,
+    fontWeight: '700'
+  },
+  titleInput: {
+    marginLeft: 10,
+    color: uploadFormTextColor,
+    height: 30,
+    borderRadius: 4,
+    borderColor: inputBorderColor,
+    borderWidth: 1,
+    padding: 6,
+    paddingLeft: 10,
+  },
+  descInput: {
+    marginTop: 10,
+    width: '100%',
+    height: 150,
+    color: uploadFormTextColor,
+    borderRadius: 4,
+    borderColor: inputBorderColor,
+    borderWidth: 1,
+    padding: 15,
+  }
+})
+
+export default FormUpload</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Upload/ImagePicker.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Upload/ImagePicker.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Fragment, useEffect, useState } from 'react'
+import { View, Image, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from 'react-native'
+import * as ExpoImagePicker from 'expo-image-picker'
+import * as ImageManipulator from 'expo-image-manipulator'
+import { useNavigation } from '@react-navigation/native'
+import AsyncStorage from '@react-native-community/async-storage'
+import { Video } from 'expo-av'
+
+import FormUpload from './FormUpload'
+
+import * as API from '../../API/API'
+import { globalBlueColor } from '../../config/theme'
+
+/**
+ * @description User can choose images from his gallery and upload them
+ */
+function ImagePicker() {
+  const [image, setImage] = useState(null)
+  const [video, setVideo] = useState(null)
+  const [accountParams, setAccountParams] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [formData, setFormData] = useState({ title: "", description: "", isAlbum: false, isPublic: false })
+  const [needTitle, setNeedTitle] = useState(false)
+
+  const navigation = useNavigation()
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      !setNeedTitle(false) &amp;&amp; !setImage(null) &amp;&amp; !setVideo(null) &amp;&amp; !setIsUploading(false) &amp;&amp; !setFormData({ title: "", description: "" })
+    })
+    return unsubscribe
+  }, [navigation])
+
+  useEffect(() => {
+    (async () => {
+      const acc = JSON.parse(await AsyncStorage.getItem("account_params"))
+      setAccountParams(acc)
+    })()
+  }, [])
+
+  const pickImage = async () => {
+    const result = await ExpoImagePicker.launchImageLibraryAsync({
+      mediaTypes: ExpoImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.cancelled &amp;&amp; result.type === "image")
+      !setImage(result) &amp;&amp; setVideo(null);
+    else if (!result.cancelled &amp;&amp; result.type === "video")
+      !setVideo(result) &amp;&amp; setImage(null);
+  }
+
+  const uploadImage = async () => {
+    setIsUploading(true)
+    setNeedTitle(false)
+    const { title, description, isAlbum, isPublic } = formData
+    const img = await ImageManipulator.manipulateAsync(
+      image.uri, [],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG, base64: true }
+    )
+    const body = { image: img.base64, type: 'base64', title, description }
+
+    if (isPublic &amp;&amp; title === "")
+      return !setNeedTitle(true) &amp;&amp; setIsUploading(false)
+
+    if (isAlbum) {
+      const res = await API.uploadImage(accountParams.access_token, { image: img.base64, type: 'base64' })
+      const albumRes = await API.uploadAlbum(accountParams.access_token, { image: res.data.id, title, description })
+      if (isPublic)
+        await API.shareAlbum(accountParams.access_token, albumRes.data.id, title)
+    } else {
+      await API.uploadImage(accountParams.access_token, body)
+    }
+    setIsUploading(false)
+  }
+
+  const uploadVideo = async () => {
+    // setIsUploading(true)
+    // const file = new Blob([video.uri], { type: "video\/mp4" })
+  }
+
+  return (
+    &lt;View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      { !image &amp;&amp; !video &amp;&amp;
+        &lt;TouchableOpacity onPress={pickImage} style={styles.button}>
+          &lt;Text style={styles.buttonText}>CHOOSE AN IMAGE OR A VIDEO&lt;/Text>
+        &lt;/TouchableOpacity>
+      }
+      { image &amp;&amp;
+        &lt;Fragment>
+          &lt;Image source={{ uri: image.uri }} style={{ width: image.width, height: image.height, ...styles.image }} />
+          &lt;View style={{ ...styles.container, marginTop: 20 }}>
+            &lt;TouchableOpacity onPress={pickImage} style={styles.button}>
+              &lt;Text style={styles.buttonText}>CHANGE&lt;/Text>
+            &lt;/TouchableOpacity>
+            &lt;TouchableOpacity onPress={uploadImage} style={styles.button} disabled={isUploading}>
+              {isUploading &amp;&amp;
+                &lt;ActivityIndicator size="small" color="#fff" />
+              }
+              {!isUploading &amp;&amp;
+                &lt;Text style={styles.buttonText}>UPLOAD&lt;/Text>
+              }
+            &lt;/TouchableOpacity>
+          &lt;/View>
+          { needTitle &amp;&amp;
+            &lt;Text style={{ fontSize: 14, fontWeight: 'bold', color: '#a00', marginTop: 10 }}>Enter a title to make it Public&lt;/Text>
+          }
+          &lt;FormUpload setFormData={setFormData} isUploading={isUploading} />
+        &lt;/Fragment>
+      }
+      { video &amp;&amp;
+        &lt;Fragment>
+          &lt;Video
+            source={{ uri: video.uri }}
+            resizeMode={Video.RESIZE_MODE_COVER}
+            style={{ width: video.width, height: video.height, ...styles.image }}
+            shouldPlay isLooping isMuted
+          />
+          &lt;View style={{ ...styles.container, marginTop: 20 }}>
+            &lt;TouchableOpacity onPress={pickImage} style={styles.button}>
+              &lt;Text style={styles.buttonText}>CHANGE&lt;/Text>
+            &lt;/TouchableOpacity>
+            &lt;TouchableOpacity onPress={uploadVideo} style={styles.button} disabled={isUploading}>
+              {isUploading &amp;&amp;
+                &lt;ActivityIndicator size="small" color="#fff" />
+              }
+              {!isUploading &amp;&amp;
+                &lt;Text style={styles.buttonText}>UPLOAD&lt;/Text>
+              }
+            &lt;/TouchableOpacity>
+          &lt;/View>
+          &lt;FormUpload setFormData={setFormData} isUploading={isUploading} />
+        &lt;/Fragment>
+      }
+    &lt;/View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: '70%',
+    flexDirection: 'row',
+    justifyContent: "space-evenly",
+    alignItems: "center"
+  },
+  button: {
+    backgroundColor: globalBlueColor,
+    padding: 10,
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderRadius: 4,
+    width: 'auto',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  image: {
+    resizeMode: "contain",
+    maxWidth: '90%',
+    maxHeight: '30%',
+    borderRadius: 10,
+  },
+})
+
+export default ImagePicker</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

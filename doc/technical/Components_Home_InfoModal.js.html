@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Components/Home/InfoModal.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Components/Home/InfoModal.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Fragment, useEffect, useState } from 'react'
+import { Image, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
+import { Text, Icon } from 'native-base'
+import AsyncStorage from '@react-native-community/async-storage'
+
+import CommentInfo from './CommentInfo'
+import ImageCarousel from './ImageCarousel'
+
+import {
+  addAlbumToFavorite,
+  addImageToFavorite,
+  getAvatar,
+  getComment,
+  albumVote
+} from '../../API/API'
+import {
+  globalBlueColor,
+  homeBackgroundColor,
+  lightTitleTextColor,
+  spinnerColor,
+  titleTextColor
+} from '../../config/theme'
+
+/**
+ * @function
+ * @description Displays all informations about current public post. If the post is not public this component should not be displayed
+ * @param {Object} item An object containing current item's informations
+ * @param {Object} accountParams An object containing infomations about the user logged in
+ * @param {Bool} isLike True if the post is liked by the user, false if not, setted in a higher level component
+ * @param {Function} setFavorite set isLike value in a higher level component
+ * @param {Object} commentData An object containing informations about comments, setted in a higher level component
+ * @param {Function} addComment add a comment to the commentData in a higher level component
+ */
+const PublicContent = ({ item, accountParams, isLike, setFavorite, commentData, addComment, voteAlbum }) => (
+  &lt;Fragment>
+    &lt;Text style={{ color: lightTitleTextColor, padding: 10 }}>{item.views} views&lt;/Text>
+    &lt;View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: 10, marginRight: 10 }}>
+      &lt;View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        &lt;TouchableOpacity onPress={setFavorite}>
+          &lt;Icon name={isLike ? "md-heart" : "md-heart-empty"} style={{ color: '#e33', fontSize: 30 }} />
+        &lt;/TouchableOpacity>
+        &lt;Text style={{ color: titleTextColor, fontWeight: 'bold', marginLeft: 10 }}>{item.favorite_count}&lt;/Text>
+      &lt;/View>
+      &lt;View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        &lt;TouchableOpacity style={{ marginLeft: 20 }} onPress={() => voteAlbum("up")}>
+          &lt;Icon name={item.vote === "up" ? "ios-arrow-dropup-circle" : "ios-arrow-dropup"} style={styles.vote} />
+        &lt;/TouchableOpacity>
+        &lt;Text style={{ color: titleTextColor, fontWeight: 'bold', marginLeft: 10, marginRight: 10 }}>{item.ups - item.downs}&lt;/Text>
+        &lt;TouchableOpacity onPress={() => voteAlbum("down")}>
+          &lt;Icon name={item.vote === "down" ? "ios-arrow-dropdown-circle" : "ios-arrow-dropdown"} style={styles.vote} />
+        &lt;/TouchableOpacity>
+      &lt;/View>
+      &lt;View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        &lt;Text style={{ color: titleTextColor, fontWeight: 'bold', marginRight: 10 }}>{item.comment_count}&lt;/Text>
+        &lt;TouchableOpacity onPress={() => null}>
+          &lt;Icon name="chatbubbles" style={{ color: globalBlueColor, fontSize: 30 }} />
+        &lt;/TouchableOpacity>
+      &lt;/View>
+    &lt;/View>
+    &lt;Text style={styles.description}>{item.description}&lt;/Text>
+    &lt;CommentInfo token={accountParams ? accountParams.access_token : ""} commentData={commentData} id={item.id} addMyComment={addComment} />
+  &lt;/Fragment>
+)
+
+/**
+ * @function
+ * @description Content of the modal, displays all the informations about the current item
+ * @param {Object} item An object containing current item's informations
+ * @param {Function} setFavoriteById A function to set favorite values depending on the id in a higher level component
+ * @param {Function} setVoteById A function to set vote values depending on the id in a higher level component
+ * @param {Function} setModalState A function to set modal open value in a higher level component
+ */
+function InfoModal({ item, setFavoriteById, setVoteById, setModalState }) {
+  const [isLike, setIsLike] = useState(item.favorite)
+  const [accountParams, setAccountParams] = useState(null)
+  const [userData, setUserData] = useState(null)
+  const [commentData, setCommentData] = useState(null)
+  const [previousVote, setPreviousVote] = useState(item.vote)
+
+  useEffect(() => {
+    (async () => {
+      const acc = JSON.parse(await AsyncStorage.getItem("account_params"))
+      setAccountParams(acc)
+      const rep = await getAvatar(acc.access_token, item.account_url)
+      setUserData(rep.data)
+      const rep2 = await getComment(acc.access_token, item.id)
+      setCommentData(rep2.status === 400 ? [] : rep2.data)
+      setPreviousVote(item.vote === null ? "veto" : item.vote)
+    })()
+  }, [])
+
+  const setFavorite = () => {
+    if (item.is_album)
+      addAlbumToFavorite(accountParams.access_token, item.id)
+    else
+      addImageToFavorite(accountParams.access_token, item.id)
+    setFavoriteById(item.id, !isLike)
+    setIsLike(!isLike)
+  }
+
+  const voteAlbum = (value) => {
+    if (previousVote === value) {
+      setVoteById(item.id, "veto", previousVote)
+      albumVote(accountParams.access_token, item.id, "veto")
+      setPreviousVote("veto")
+    }
+    else {
+      setVoteById(item.id, value, previousVote)
+      albumVote(accountParams.access_token, item.id, value)
+      setPreviousVote(value)
+    }
+  }
+
+  const addComment = (msg) => {
+    const _commentData = [...commentData]
+    _commentData.push({
+      comment: msg,
+      author: accountParams.account_username,
+    })
+    setCommentData(_commentData)
+  }
+
+  return (
+    &lt;View style={{ flex: 1, backgroundColor: homeBackgroundColor }}>
+      &lt;View style={{ flexDirection: "row", alignItems: 'center' }}>
+        &lt;TouchableOpacity onPress={() => setModalState(false)}>
+          &lt;Icon active name="ios-close" style={{ fontSize: 60, color: spinnerColor, marginLeft: 20 }} />
+        &lt;/TouchableOpacity>
+        {userData &amp;&amp;
+          &lt;Image style={{ height: 40, width: 40, resizeMode: "contain", borderRadius: 40, marginLeft: 20 }} source={{ uri: userData.avatar + `&amp;nocache=${userData.avatar_name}` }} />
+        }
+        &lt;Text style={styles.title} numberOfLines={2}>{!item.title ? "No title" : item.title}&lt;/Text>
+      &lt;/View>
+      &lt;Text style={styles.subtitle}>from: {item.account_url}&lt;/Text>
+      &lt;ScrollView>
+        &lt;ImageCarousel itemArray={item.is_album ? item.images : [item]} />
+        {item.in_gallery &amp;&amp;
+          &lt;PublicContent item={item} accountParams={accountParams} setFavorite={setFavorite} isLike={isLike} commentData={commentData} addComment={addComment} voteAlbum={voteAlbum} />
+        }
+      &lt;/ScrollView>
+    &lt;/View>
+  );
+}
+
+const styles = StyleSheet.create({
+  title: {
+    fontWeight: '700',
+    flex: 1,
+    color: titleTextColor,
+    padding: 10
+  },
+  subtitle: {
+    alignSelf: 'center',
+    color: lightTitleTextColor,
+    fontWeight: "bold",
+    fontSize: 14
+  },
+  description: {
+    color: 'black',
+    padding: 10
+  },
+  vote: {
+    color: globalBlueColor,
+    fontSize: 30
+  },
+  upvote: {
+    color: 'green',
+    fontSize: 30
+  },
+  downvote: {
+    color: 'red',
+    fontSize: 30
+  }
+})
+
+export default InfoModal</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AboutTab">AboutTab</a></li><li><a href="global.html#AlbumItem">AlbumItem</a></li><li><a href="global.html#AuthPage">AuthPage</a></li><li><a href="global.html#CarouselItem">CarouselItem</a></li><li><a href="global.html#CommentInfo">CommentInfo</a></li><li><a href="global.html#CustomImage">CustomImage</a></li><li><a href="global.html#FavoriteGalleryItem">FavoriteGalleryItem</a></li><li><a href="global.html#FavoriteItem">FavoriteItem</a></li><li><a href="global.html#FormUpload">FormUpload</a></li><li><a href="global.html#Gallery">Gallery</a></li><li><a href="global.html#ImageCarousel">ImageCarousel</a></li><li><a href="global.html#ImageItem">ImageItem</a></li><li><a href="global.html#ImagePicker">ImagePicker</a></li><li><a href="global.html#InfoModal">InfoModal</a></li><li><a href="global.html#InfoProfile">InfoProfile</a></li><li><a href="global.html#MyAlbumTab">MyAlbumTab</a></li><li><a href="global.html#MyFavoritesTab">MyFavoritesTab</a></li><li><a href="global.html#MyImagesTab">MyImagesTab</a></li><li><a href="global.html#Navigation">Navigation</a></li><li><a href="global.html#PermissionManager">PermissionManager</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#PublicContent">PublicContent</a></li><li><a href="global.html#Search">Search</a></li><li><a href="global.html#Settings">Settings</a></li><li><a href="global.html#Upload">Upload</a></li><li><a href="global.html#UploadWrapper">UploadWrapper</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 23:51:03 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
